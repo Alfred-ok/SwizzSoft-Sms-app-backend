@@ -1,3 +1,4 @@
+/*
 package com.example.SwizzSoft_Sms_app.SecurityAndJwt.config;
 
 import com.example.SwizzSoft_Sms_app.SecurityAndJwt.service.AppUserDetailsService;
@@ -50,3 +51,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
+*/

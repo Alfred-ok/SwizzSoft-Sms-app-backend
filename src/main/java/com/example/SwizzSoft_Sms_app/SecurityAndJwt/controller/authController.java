@@ -2,40 +2,30 @@ package com.example.SwizzSoft_Sms_app.SecurityAndJwt.controller;
 
 
 import com.example.SwizzSoft_Sms_app.SecurityAndJwt.dto.*;
-import com.example.SwizzSoft_Sms_app.SecurityAndJwt.entities.AppUser;
-import com.example.SwizzSoft_Sms_app.SecurityAndJwt.repository.AppUserRepository;
-import com.example.SwizzSoft_Sms_app.SecurityAndJwt.service.AppUserDetailsService;
 import com.example.SwizzSoft_Sms_app.SecurityAndJwt.webtoken.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 public class authController {
-    @Autowired
-    private AppUserRepository repository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
-    @Autowired
-    private AuthenticationManager authenticationManager;
+   // @Autowired
+   // private AuthenticationManager authenticationManager;
     @Autowired
     private JwtService jwtService;
-    @Autowired
-    private AppUserDetailsService appUserDetailsService;
+
 
 
     private static final String BASE_URL = "http://138.201.58.10:9001/api/Auth";
@@ -154,7 +144,7 @@ public class authController {
 
 
 
-
+/*
 
 
     @PostMapping("auth/refresh-token")
@@ -171,8 +161,8 @@ public class authController {
         refreshToken = authHeader.substring(7);
         userName = jwtService.extractUsername(refreshToken);
         if (userName != null) {
-            AppUser user = this.repository.findByUsername(userName)
-                    .orElseThrow();
+           // AppUser user = this.repository.findByUsername(userName)
+           //         .orElseThrow();
             if (jwtService.isTokenValid(refreshToken)) {
                 var accessToken = jwtService.generateToken(user.getUsername());
                 //revokeAllUserTokens(user);
@@ -187,5 +177,5 @@ public class authController {
             }
         }
     }
-
+*/
 }
