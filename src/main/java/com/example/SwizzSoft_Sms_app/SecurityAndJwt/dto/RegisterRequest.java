@@ -1,6 +1,5 @@
 package com.example.SwizzSoft_Sms_app.SecurityAndJwt.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginForm {
-    private String username;
-    private String password;
-
+public class RegisterRequest {
+    private String Names;
+    private String Email;
+    private String Organisation;
+    private String UserName;
+    private String Password;
+    private String Roles;
 }

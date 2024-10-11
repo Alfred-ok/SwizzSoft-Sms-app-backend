@@ -5,9 +5,14 @@ import lombok.Data;
 @Data
 public class JwtAuthenticationResponse {
 
+
     private String user;
 
     private String role;
+
+    private String responseCode;
+
+    private String responseMessage;
 
     private String accessToken;
 

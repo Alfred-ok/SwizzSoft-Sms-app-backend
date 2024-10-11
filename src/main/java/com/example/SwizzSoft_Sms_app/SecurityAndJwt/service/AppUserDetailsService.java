@@ -19,16 +19,16 @@ public class AppUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
         Optional<AppUser> user = repository.findByUsername(username);
-                if (user.isPresent()){
-                    var userObj = user.get();
-                    return User.builder()
-                            .username(userObj.getUsername())
-                            .password(userObj.getPassword())
-                            .roles(getRoles(userObj))
-                            .build();
-                }else {
-                    throw new UsernameNotFoundException(username);
-                }
+        if (user.isPresent()){
+            var userObj = user.get();
+            return User.builder()
+                    .username(userObj.getUsername())
+                    .password(userObj.getPassword())
+                    .roles(userObj.getRole())
+                    .build();
+        }else {
+            throw new UsernameNotFoundException(username);
+        }
     }
     private String[] getRoles(AppUser user ){
         if (user.getRole() == null){
