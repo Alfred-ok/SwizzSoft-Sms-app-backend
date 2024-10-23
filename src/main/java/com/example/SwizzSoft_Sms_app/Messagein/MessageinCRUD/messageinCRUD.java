@@ -2,18 +2,12 @@ package com.example.SwizzSoft_Sms_app.Messagein.MessageinCRUD;
 
 import com.example.SwizzSoft_Sms_app.Messagein.dbo.Messagein;
 import com.example.SwizzSoft_Sms_app.Messagein.repo.messageinRepo;
-import com.example.SwizzSoft_Sms_app.Organisation.dbo.Organisations;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -60,7 +54,26 @@ public class messageinCRUD {
     }
 
 
+    @GetMapping("/get_message-in")
+    public ResponseEntity<Object> getMessage() {
+       return ResponseEntity.ok(repo.findAll(PageRequest.of(0, 100)).getContent());
+    }
 
+   /* @GetMapping("/get_code/{code}")
+    public ResponseEntity<Optional<Messagein>> getByCode(@PathVariable Integer code){
+        System.out.println(repo.findByCode(code));
+        return ResponseEntity.ok(repo.findByCode(code));
+    }*/
 
+    @GetMapping("/get_code/{code}")
+    public ResponseEntity<List<Messagein>> getByCode(@PathVariable Integer code) {
+        Pageable pageable = PageRequest.of(0, 80);
+        List<Messagein> messages = repo.findByCode(code, pageable).getContent();;
+
+        if (messages.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(messages);
+    }
 }
 

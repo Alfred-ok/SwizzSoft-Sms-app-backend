@@ -7,9 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 import static java.lang.Integer.parseInt;
 
@@ -85,6 +84,26 @@ public class OrganisationCRUD {
     public ResponseEntity<Object> getOrganisationById(@PathVariable Long Id) {
         return ResponseEntity.ok(repo.findById(Id));
     }
+/*
+    @GetMapping("/organisation_groupID/{groupID}")
+    public ResponseEntity<Object> getOrganisationsByGroupID(@PathVariable String groupID){
+        System.out.println(repo.findByGroupID(groupID));
+        return ResponseEntity.ok(repo.findByGroupID(groupID));
+    }
+  */
+
+
+    @GetMapping("/org_group_id/{groupID}")
+    public ResponseEntity<List<Organisations>> getOrganisationsByGroupID(@PathVariable String groupID) {
+        List<Organisations> organisations = repo.findByGroupID(groupID);
+        System.out.println(organisations);
+        if (organisations.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(organisations);
+    }
+
+
 
     // PUT method to update organisation details
     @PutMapping("/update-organisation/{id}")

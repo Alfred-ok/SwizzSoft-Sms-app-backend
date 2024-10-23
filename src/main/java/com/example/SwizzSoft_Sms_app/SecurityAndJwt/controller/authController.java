@@ -133,8 +133,11 @@ public class authController {
                 jwtAuthenticationResponse.setRole(loginResponse.getPrivilege());
                 jwtAuthenticationResponse.setResponseCode(loginResponse.getResponseCode());
                 jwtAuthenticationResponse.setResponseMessage(loginResponse.getResponseMessage());
+                jwtAuthenticationResponse.setGroupId(loginResponse.getGroupId());
 
+               // System.out.println("jwtAuthenticationResponse JSON String: " + jwtAuthenticationResponse);
                 return jwtAuthenticationResponse;
+
             } else {
                 throw new IOException("Login failed: " + response.message());
             }

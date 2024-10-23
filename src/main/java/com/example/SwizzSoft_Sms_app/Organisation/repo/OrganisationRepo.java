@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 public interface OrganisationRepo extends JpaRepository<Organisations, Long> {
@@ -21,6 +22,11 @@ public interface OrganisationRepo extends JpaRepository<Organisations, Long> {
 
     @Query("SELECT o FROM Organisations o WHERE o.url = :url")
     Optional<Organisations>findByUrl(@Param("url") String url);
+
+    @Query("SELECT o FROM Organisations o WHERE o.groupID = :groupID")
+    List<Organisations>findByGroupID(@Param("groupID") String groupID);
+
+    //List<Organisations> findByGroupID(String groupID);
 
    // Optional<Organisations> findByOrg_Code(Integer orgCode);
 }

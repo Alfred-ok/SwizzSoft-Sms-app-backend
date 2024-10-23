@@ -33,6 +33,12 @@ public class Organisations {
     @Column(name = "Sms_Cost")
     private BigDecimal smsCost;
 
+    @Column(name = "Sms_Units")
+    private Integer Sms_Units;
+
+    @Column(name = "Balance")
+    private BigDecimal Balance;
+
     @Column(name = "MBCode")
     private Integer MBCode;
 

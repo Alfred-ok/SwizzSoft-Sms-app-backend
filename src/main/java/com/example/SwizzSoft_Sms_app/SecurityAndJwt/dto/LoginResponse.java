@@ -18,6 +18,8 @@ public class LoginResponse {
     @JsonProperty("Priviledge")
     private String privilege;
 
+    @JsonProperty("groupID")
+    private String groupId;
     // Default constructor
     public LoginResponse() {}
 
