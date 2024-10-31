@@ -20,7 +20,7 @@ public class messageinCRUD {
 
     // POST endpoint to save a new message
     @PostMapping("/messagein")
-    public ResponseEntity<?> createMessage(@RequestBody Messagein messagesIn) {
+    public ResponseEntity<String> createMessage(@RequestBody Messagein messagesIn) {
         //Random 3 digit code
         Random rand = new Random();
         int randomNum = rand.nextInt(900) + 100;
@@ -50,7 +50,7 @@ public class messageinCRUD {
             repo.save(message);
         }
 
-        return ResponseEntity.ok("successfully");
+        return ResponseEntity.ok("Successfully");
     }
 
 
