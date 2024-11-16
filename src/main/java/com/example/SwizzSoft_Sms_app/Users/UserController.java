@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 public class UserController {
 
@@ -13,6 +15,7 @@ public class UserController {
 
     @GetMapping("/get_User")
     public ResponseEntity<Object> getUser() {
-        return ResponseEntity.ok(repo.findAll());
+        List<AspNetUsers> users = repo.findAllByOrderByIdDesc();
+        return ResponseEntity.ok(users);
     }
 }

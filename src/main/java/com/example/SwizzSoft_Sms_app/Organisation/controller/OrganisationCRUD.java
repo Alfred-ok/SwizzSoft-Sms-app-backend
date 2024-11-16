@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,7 +31,7 @@ public class OrganisationCRUD {
 
         if (existingOrgCode.isPresent()) {
             // If an organization with the same orgCode is found, return a message indicating it's a duplicate
-            return "Registration failed: Organization with the same org code already exists.";
+            return "Registration failed. Organization with the same org code already exists.";
         }
 
         // Check if the url already exists in the database
@@ -38,7 +39,7 @@ public class OrganisationCRUD {
 
         if (existingUrl.isPresent()) {
             // If url with the same url is found, return a message indicating it's a duplicate
-            return "Registration failed: url with the same url already exists.";
+            return "Registration failed. Url with the same url already exists.";
         }
 
         // If orgCode is not present in the database, proceed to save the new organization
@@ -56,11 +57,14 @@ public class OrganisationCRUD {
 
             org.setSmsCost(request.getSmsCost());
 
+            //check this balance before deployment
+            org.setBalance(BigDecimal.valueOf(0));
+
             // Save the new organization to the database
             repo.save(org);
 
         } catch (Exception e) {
-            throw new RuntimeException("Registration failed");
+            return "Registration failed";
 
         }
 
