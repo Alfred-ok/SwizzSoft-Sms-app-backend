@@ -1,6 +1,7 @@
 package com.example.SwizzSoft_Sms_app.Organisation.controller;
 
 import com.example.SwizzSoft_Sms_app.Organisation.dbo.Organisations;
+import com.example.SwizzSoft_Sms_app.Organisation.dbo.PaymentRequestSum;
 import com.example.SwizzSoft_Sms_app.Organisation.repo.OrganisationRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -56,6 +57,9 @@ public class OrganisationCRUD {
             org.setGroupID(request.getGroupID());
 
             org.setSmsCost(request.getSmsCost());
+
+            //check this sms Units
+            org.setSms_Units(0);
 
             //check this balance before deployment
             org.setBalance(BigDecimal.valueOf(0));
@@ -144,6 +148,49 @@ public class OrganisationCRUD {
         // If organisation not found, return 404
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Organisation not found");
     }
+
+
+    }
+
+
+
+
+    // PUT method to update organisation details
+    @PutMapping("/update-organisation-payment/{id}")
+    public ResponseEntity<String> updateOrganisationByPayment(@PathVariable Long id, @RequestBody PaymentRequestSum requestData) {
+
+        // Fetch the organisation by ID
+        Optional<Organisations> optionalOrg = repo.findById(id);
+        // Random rand = new Random();
+        // int randomNum = rand.nextInt(900) + 100;
+
+        // Check if the organisation exists
+        if (optionalOrg.isPresent()) {
+            Organisations org = optionalOrg.get();
+
+            // Update SMS Units (ensure safe integer addition)
+            int updatedSmsUnits = org.getSms_Units() + requestData.getQuantity();
+            System.out.println(org.getSms_Units());
+            System.out.println( requestData.getQuantity());
+            org.setSms_Units(updatedSmsUnits);
+
+            System.out.println(updatedSmsUnits);
+
+            // Update Balance (using BigDecimal for monetary values)
+            BigDecimal updatedBalance = org.getBalance().add(requestData.getTotal());
+            System.out.println(org.getBalance());
+            System.out.println(requestData.getTotal());
+            org.setBalance(updatedBalance);
+
+            System.out.println(updatedBalance);
+            // Save the updated organisation back to the repository
+            repo.save(org);
+
+            return ResponseEntity.ok("Organisation updated successfully");
+        } else {
+            // If organisation not found, return 404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Organisation not found");
+        }
 
 
     }

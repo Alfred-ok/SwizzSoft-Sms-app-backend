@@ -10,4 +10,6 @@ public class SwizzSoftSmsAppApplication {
 		SpringApplication.run(SwizzSoftSmsAppApplication.class, args);
 	}
 
+
+
 }
