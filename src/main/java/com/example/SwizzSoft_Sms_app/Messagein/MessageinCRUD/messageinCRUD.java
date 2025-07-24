@@ -4,21 +4,31 @@ import com.example.SwizzSoft_Sms_app.Messagein.Base64File;
 import com.example.SwizzSoft_Sms_app.Messagein.FileUploadRequest;
 import com.example.SwizzSoft_Sms_app.Messagein.dbo.Messagein;
 import com.example.SwizzSoft_Sms_app.Messagein.repo.messageinRepo;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
 
 @RestController
 public class messageinCRUD {
@@ -175,22 +185,148 @@ public class messageinCRUD {
 
 
 
-
-   /* @GetMapping("/get_code/{code}")
+/*
+   @GetMapping("/get_code/{code}")
     public ResponseEntity<Optional<Messagein>> getByCode(@PathVariable Integer code){
         System.out.println(repo.findByCode(code));
         return ResponseEntity.ok(repo.findByCode(code));
-    }*/
+    }
+*/
+
 
     @GetMapping("/get_code/{code}")
-    public ResponseEntity<List<Messagein>> getByCode(@PathVariable Integer code) {
-        Pageable pageable = PageRequest.of(0, 80);
-        List<Messagein> messages = repo.findByCode(code, pageable).getContent();;
+    public ResponseEntity<Page<Messagein>> getByCodeAndStatus(
+            @PathVariable Integer code,
+            @RequestParam(required = false) String sendStatus,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size) {
 
-        if (messages.isEmpty()) {
+        Pageable pageable = PageRequest.of(page, size); // No need for manual sort, it's handled in method name
+
+        Page<Messagein> messagesPage;
+
+        if (sendStatus != null && !sendStatus.isBlank()) {
+            messagesPage = repo.findByCodeAndSendStatusOrderByAuditDateDesc(code, sendStatus, pageable);
+        } else {
+            messagesPage = repo.findByCodeOrderByAuditDateDesc(code, pageable);
+        }
+
+        if (messagesPage.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(messages);
+
+        return ResponseEntity.ok(messagesPage);
     }
+
+
+
+
+    @GetMapping(value = "/export_excel_base64/{code}", produces = MediaType.TEXT_PLAIN_VALUE)
+    @Transactional(readOnly = true)
+    public ResponseEntity<String> exportMessagesAsBase64(@PathVariable Integer code) {
+        List<Messagein> outmessage = repo.findByCodeOrderByAuditDateDesc(code);
+        if (outmessage.isEmpty()) {
+            return ResponseEntity.status(204).build(); // No Content
+        }
+
+
+        try (
+                SXSSFWorkbook workbook = new SXSSFWorkbook(); // For large data
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                Stream<Messagein> messages = repo.streamByCode(code) // Stream instead of List
+        ) {
+            Sheet sheet = workbook.createSheet("Messages");
+
+            // Header
+            Row header = sheet.createRow(0);
+            header.createCell(0).setCellValue("Phone Number");
+            header.createCell(1).setCellValue("Message");
+            header.createCell(2).setCellValue("Send Status");
+            header.createCell(3).setCellValue("Audit Date");
+
+            // Stream and write rows
+            final int[] rowNum = {1};
+            messages.forEach(msg -> {
+                Row row = sheet.createRow(rowNum[0]++);
+                row.createCell(0).setCellValue(msg.getPhoneNumber());
+                row.createCell(1).setCellValue(msg.getMessage());
+                row.createCell(2).setCellValue(msg.getSendStatus());
+                row.createCell(3).setCellValue(msg.getAuditDate() != null ? msg.getAuditDate().toString() : "");
+            });
+
+            workbook.write(out);
+            workbook.dispose(); // Clean up temporary files
+
+            String base64 = Base64.getEncoder().encodeToString(out.toByteArray());
+            return ResponseEntity.ok(base64);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+
+
+
+    @GetMapping(value = "/export_excel_base64_filtered", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> exportFiltered(
+            @RequestParam Integer code,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        try {
+            List<Messagein> messages = repo.findWithFilters(code, phone, status, startDate, endDate);
+
+            if (messages == null || messages.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            }
+
+            try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                Sheet sheet = workbook.createSheet("Messages");
+
+                // Set header
+                Row header = sheet.createRow(0);
+                header.createCell(0).setCellValue("Phone Number");
+                header.createCell(1).setCellValue("Message");
+                header.createCell(2).setCellValue("Send Status");
+                header.createCell(3).setCellValue("Audit Date");
+
+                // Populate rows
+                int rowNum = 1;
+                for (Messagein msg : messages) {
+                    Row row = sheet.createRow(rowNum++);
+                    row.createCell(0).setCellValue(msg.getPhoneNumber());
+                    row.createCell(1).setCellValue(msg.getMessage());
+                    row.createCell(2).setCellValue(msg.getSendStatus());
+                    row.createCell(3).setCellValue(
+                            msg.getAuditDate() != null ? msg.getAuditDate().toString() : ""
+                    );
+                }
+
+                // Convert to Base64
+                workbook.write(out);
+                String base64 = Base64.getEncoder().encodeToString(out.toByteArray());
+                return ResponseEntity.ok(base64);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to export Excel");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error occurred");
+        }
+    }
+
+
+
+
+
+
+
+
 }
 

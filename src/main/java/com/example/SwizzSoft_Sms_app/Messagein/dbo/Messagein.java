@@ -41,5 +41,8 @@ public class Messagein {
     @Column(name = "AuditDate")
     private LocalDateTime auditDate;
 
+    @Column(name = "ResponseStatus")
+    private String responseStatus ;
+
 }
 

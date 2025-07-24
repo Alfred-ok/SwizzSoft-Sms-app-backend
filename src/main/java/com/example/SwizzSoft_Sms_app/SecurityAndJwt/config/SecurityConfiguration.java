@@ -36,7 +36,7 @@ public class SecurityConfiguration {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/home", "/h2-console/**", "/auth/**" ,"/registerOrganisation","/get_organisation","/get_organisation/**","/update-organisation/**","/messagein","/convert","/get_User", "/get_message-in","/organisation_groupID/**","/get_code/**","/org_group_id/**","/api/excel/**","/messageinfile", "/mpesapayment","/update-organisation-payment/**").permitAll();
+                    registry.requestMatchers("/home", "/auth/**" ,"/registerOrganisation","/get_organisation","/get_organisation/**","/update-organisation/**","/messagein","/convert","/get_User", "/get_message-in","/organisation_groupID/**","/get_code","/get_code/**","/org_group_id/**","/api/excel/**","/messageinfile", "/mpesapayment","/update-organisation-payment/**", "/export_excel_base64/**","/export_excel_base64_filtered/** ", "/export_excel_base64_filtered").permitAll();
                     registry.requestMatchers("/admin/**").hasRole("ADMIN");
                     registry.requestMatchers("/user/**").hasRole("USER");
                     registry.anyRequest().authenticated();
